@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.common.Result;
 import com.example.demo.entity.User;
 import org.springframework.web.bind.annotation.*;
 
@@ -7,27 +8,29 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/users")
 public class UserController {
 
-    // 1. 查询用户 GET
+    // 根据ID查询用户
     @GetMapping("/{id}")
-    public String getUser(@PathVariable("id") Long id) {
-        return "查询成功，正在返回ID为" + id + "的用户信息";
+    public Result<User> getUser(@PathVariable Long id) {
+        User user = new User();
+        user.setId(id);
+        return Result.success(user);
     }
 
-    // 2. 新增用户 POST
+    // 新增用户
     @PostMapping
-    public String createUser(@RequestBody User user) {
-        return "新增成功，接收到用户：" + user.getName() + "，年龄：" + user.getAge();
+    public Result<String> createUser(@RequestBody User user) {
+        return Result.success("用户创建成功：" + user.getName());
     }
 
-    // 3. 更新用户 PUT
-    @PutMapping("/{id}")
-    public String updateUser(@PathVariable("id") Long id, @RequestBody User user) {
-        return "更新成功，ID" + id + "的用户已修改为：" + user.getName();
+    // 登录接口
+    @PostMapping("/login")
+    public Result<String> login() {
+        return Result.success("登录成功");
     }
 
-    // 4. 删除用户 DELETE
+    // 删除用户
     @DeleteMapping("/{id}")
-    public String deleteUser(@PathVariable("id") Long id) {
-        return "删除成功，已移除ID为" + id + "的用户";
+    public Result<String> deleteUser(@PathVariable Long id) {
+        return Result.success("用户删除成功，ID：" + id);
     }
 }
