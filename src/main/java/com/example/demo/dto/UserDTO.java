@@ -1,25 +1,11 @@
-package com.example.demo.entity;
+package com.example.demo.dto;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
-
-@TableName("sys_user")
-public class User {
-    @TableId(type = IdType.AUTO)
-    private Long id;
+public class UserDTO {
     private String username;
     private String password;
-    private String email;
+    private String email;  // 添加email字段
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
+    // Getters and Setters
     public String getUsername() {
         return username;
     }

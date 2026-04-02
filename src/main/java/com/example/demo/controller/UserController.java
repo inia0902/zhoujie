@@ -1,36 +1,33 @@
 package com.example.demo.controller;
 
 import com.example.demo.common.Result;
-import com.example.demo.entity.User;
+import com.example.demo.dto.UserDTO;
+import com.example.demo.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
 
-    // 根据ID查询用户
-    @GetMapping("/{id}")
-    public Result<User> getUser(@PathVariable Long id) {
-        User user = new User();
-        user.setId(id);
-        return Result.success(user);
-    }
+    @Autowired
+    private UserService userService;
 
-    // 新增用户
+    // 注册
     @PostMapping
-    public Result<String> createUser(@RequestBody User user) {
-        return Result.success("用户创建成功：" + user.getName());
+    public Result<String> register(@RequestBody UserDTO userDTO) {
+        return userService.register(userDTO);
     }
 
-    // 登录接口
+    // 登录
     @PostMapping("/login")
-    public Result<String> login() {
-        return Result.success("登录成功");
+    public Result<String> login(@RequestBody UserDTO userDTO) {
+        return userService.login(userDTO);
     }
 
-    // 删除用户
-    @DeleteMapping("/{id}")
-    public Result<String> deleteUser(@PathVariable Long id) {
-        return Result.success("用户删除成功，ID：" + id);
+    // 获取用户信息
+    @GetMapping("/{id}")
+    public Result<String> getUser(@PathVariable Long id) {
+        return Result.success("查询成功，正在返回 ID 为 " + id + " 的用户信息");
     }
 }
