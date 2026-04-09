@@ -2,49 +2,51 @@ package com.example.demo.utils;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
 
-import java.security.Key;
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Component
 public class JwtUtil {
-    // 签名密钥（实际项目应该放在配置文件中）
-    private static final String SECRET = "yourSecretKeyYourSecretKeyYourSecretKeyYourSecretKey";
-    private static final Key key = Keys.hmacShaKeyFor(SECRET.getBytes());
 
-    // Token 过期时间：24小时
-    private static final long EXPIRATION = 86400000;
+    private static final String SECRET_STRING = "your-256-bit-secret-key-your-256-bit-secret-key";
+    private static final SecretKey SECRET_KEY = Keys.hmacShaKeyFor(SECRET_STRING.getBytes(StandardCharsets.UTF_8));
+    private static final long EXPIRATION_TIME = 1000 * 60 * 60 * 24;
 
-    // 生成 Token
     public static String generateToken(String username) {
         return Jwts.builder()
-                .setSubject(username)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
-                .signWith(key, SignatureAlgorithm.HS256)
+                .subject(username)
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .signWith(SECRET_KEY)
                 .compact();
     }
 
-    // 验证 Token
-    public static boolean validateToken(String token) {
-        try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
+    public static String extractUsername(String token) {
+        return extractAllClaims(token).getSubject();
     }
 
-    // 从 Token 获取用户名
-    public static String getUsernameFromToken(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(key)
+    public static Boolean validateToken(String token, String username) {
+        final String extractedUsername = extractUsername(token);
+        return (extractedUsername.equals(username) && !isTokenExpired(token));
+    }
+
+    private static Boolean isTokenExpired(String token) {
+        return extractExpiration(token).before(new Date());
+    }
+
+    private static Date extractExpiration(String token) {
+        return extractAllClaims(token).getExpiration();
+    }
+
+    private static Claims extractAllClaims(String token) {
+        return Jwts.parser()
+                .verifyWith(SECRET_KEY)
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
-        return claims.getSubject();
+                .parseSignedClaims(token)
+                .getPayload();
     }
 }
