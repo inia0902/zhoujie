@@ -27,7 +27,7 @@ public class UserController {
 
     // 获取用户信息
     @GetMapping("/{id}")
-    public Result<String> getUser(@PathVariable Long id) {
-        return Result.success("查询成功，正在返回 ID 为 " + id + " 的用户信息");
+    public Result<UserDTO> getUser(@PathVariable Long id) {
+        return userService.getUserById(id);
     }
 }

@@ -3,9 +3,18 @@ package com.example.demo.dto;
 public class UserDTO {
     private String username;
     private String password;
-    private String email;  // 添加email字段
+    private String email;
 
-    // Getters and Setters
+    // 构造方法
+    public UserDTO() {}
+
+    public UserDTO(String username, String password, String email) {
+        this.username = username;
+        this.password = password;
+        this.email = email;
+    }
+
+    // Getter 和 Setter
     public String getUsername() {
         return username;
     }
