@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.common.Result;
 import com.example.demo.dto.UserDTO;
 import com.example.demo.service.UserService;
+import com.example.demo.vo.UserDetailVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,29 +14,30 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    // 注册
     @PostMapping
     public Result<String> register(@RequestBody UserDTO userDTO) {
         return userService.register(userDTO);
     }
 
-    // 登录
     @PostMapping("/login")
     public Result<String> login(@RequestBody UserDTO userDTO) {
         return userService.login(userDTO);
     }
 
-    // 获取用户信息
     @GetMapping("/{id}")
     public Result<UserDTO> getUser(@PathVariable Long id) {
         return userService.getUserById(id);
     }
 
-    // 新增：分页查询用户列表
     @GetMapping("/page")
     public Result<Object> getUserPage(
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "5") Integer pageSize) {
         return userService.getUserPage(pageNum, pageSize);
+    }
+
+    @GetMapping("/detail/{id}")
+    public Result<UserDetailVO> getUserDetail(@PathVariable Long id) {
+        return userService.getUserDetail(id);
     }
 }

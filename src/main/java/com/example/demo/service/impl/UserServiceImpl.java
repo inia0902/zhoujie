@@ -1,5 +1,6 @@
 package com.example.demo.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.demo.common.Result;
@@ -7,14 +8,18 @@ import com.example.demo.common.ResultCode;
 import com.example.demo.dto.UserDTO;
 import com.example.demo.entity.User;
 import com.example.demo.mapper.UserMapper;
+import com.example.demo.mapper.UserInfoMapper;
 import com.example.demo.service.UserService;
 import com.example.demo.utils.JwtUtil;
+import com.example.demo.vo.UserDetailVO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,6 +27,15 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private UserInfoMapper userInfoMapper;
+
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
+
+    private static final String USER_CACHE_KEY = "user:detail:";
+    private static final long CACHE_EXPIRE_TIME = 30;
 
     @Override
     public Result<String> register(UserDTO userDTO) {
@@ -98,5 +112,25 @@ public class UserServiceImpl implements UserService {
         pageResult.put("pages", resultPage.getPages());
 
         return Result.success(pageResult);
+    }
+
+    @Override
+    public Result<UserDetailVO> getUserDetail(Long id) {
+        String cacheKey = USER_CACHE_KEY + id;
+
+        Object cachedData = redisTemplate.opsForValue().get(cacheKey);
+        if (cachedData != null) {
+            UserDetailVO cachedVO = BeanUtil.toBean(cachedData, UserDetailVO.class);
+            return Result.success(cachedVO);
+        }
+
+        UserDetailVO userDetailVO = userInfoMapper.getUserDetail(id);
+        if (userDetailVO == null || userDetailVO.getId() == null) {
+            return Result.error(ResultCode.USER_NOT_EXIST);
+        }
+
+        redisTemplate.opsForValue().set(cacheKey, userDetailVO, CACHE_EXPIRE_TIME, TimeUnit.MINUTES);
+
+        return Result.success(userDetailVO);
     }
 }
